@@ -1,0 +1,48 @@
+
+---Downloaded files---
+The import files for: Personal were successfully downloaded!
+Initial max execution time = 300
+Files info:
+Site URL = https://headabovewater.azurewebsites.net
+Data file = D:/home/site/wwwroot/wp-content/uploads/2021/03/mesmerize-ocdi/demo-content-import-file_2021-03-30__02-50-43.xml
+Widget file = D:/home/site/wwwroot/wp-content/uploads/2021/03/mesmerize-ocdi/demo-widgets-import-file_2021-03-30__02-50-43.json
+Customizer file = D:/home/site/wwwroot/wp-content/uploads/2021/03/mesmerize-ocdi/demo-customizer-import-file_2021-03-30__02-50-43.dat
+Redux files:
+not defined!
+
+---pt-ocdi/before_content_import---
+
+
+------
+New AJAX call!
+
+
+------
+New AJAX call!
+
+
+---Importing widgets---
+Sidebar widget area : 
+
+Image - Hey! I&#039;m John Doe! - Imported
+Search - No Title - Widget already exists
+Recent Posts - No Title - Widget already exists
+Recent Comments - No Title - Widget already exists
+Archives - No Title - Widget already exists
+Categories - No Title - Widget already exists
+Tag Cloud - Tags - Imported
+Meta - No Title - Widget already exists
+
+Pages Sidebar : 
+
+Search - Search - Widget already exists
+Pages - Pages - Widget already exists
+Text - Text Box - Imported
+
+
+
+---Importing customizer settings---
+Customizer settings import finished!
+
+---pt-ocdi/after_import---
+
