@@ -19,3 +19,8 @@ Our Website aims to spread prevent risks of drowning near the rock shelves by sp
 2. Add weather, wind, swell, and tide forecase for each rock shelf.
 3. Add map with rock shelves in Victoria.
 4. Best time to travel to the rock shelf in a day (hero function). This allows user to select the date.
+## Iteration 3
+1. Add 3D chart that illustrates height of tides, swells, and rock shelf together.
+2. Add 360 degree real environment picture of each rock shelf.
+3. Add system so calculate the safe travelling thime and send itinerary to email.
+4. Allow user to select rock shelf based on activities.
