@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+    <!--calendar-->
+    <form id="date-rockshelves">
+              <!--date-->
+              <div class="field">
+                  <label for="calendar">Select Date:</label>
+                  <input type="date" id="calendar" name="calendar">
+              </div>      
+              <!--rockshelves-->
+              <div class="field">
+                  <label for="rockshelves">Select Rock Shelves:</label>
+                  <select name="rockshelves" id="rockshelves">
+                    <option value="11840">Cape Woolamai</option>
+                    <option value="12454">Kilcunda</option>
+                    <option value="12614">Lorne</option>
+                    <option value="13034">Portland</option>
+                    <option value="13014">Point Lonsdale</option>
+                    <option value="13813">Cape Schanck</option>
+                    <option value="13832">Flinders</option> 
+                    <option value="35555">Tongue Point</option>
+                    <option value="27126">Point Roadknight</option>
+                    <option value="18321">Point Hicks</option>
+                    <option value="11838">Cape Otway</option> 
+                    <option value="11514">Eagle Rock</option>  
+                  </select>
+              </div>
+              <input type="submit" id="button_rockshelves">
+    </form>
+    <p id ="print" style="color: black; text-align:center; font-weight: bold; width: 100%; background-color: red;"></p>
+    <!--time-->
+    <div class="field" id ="safetime">
+        <label for="time">Available Safe Time:</label>
+            <select class="timeoftheday" style="font-size: 14px; border-radius: 15px;">
+                <option selected disabled>
+                    Available Safe Time
+                </option>
+            </select>
+    </div>
+    
+    <!--create a form-->
+    <form id="form">
+          <div class="field">
+            <label for="to_name">Your Name</label>
+            <input type="text" name="to_name" id="to_name">
+          </div>
+          <div class="field">
+            <label for="message" style="display:none">message</label>
+            <input type="text" name="message" id="message" style="display:none; white-space: pre-wrap;">
+          </div>
+          <div class="field">
+            <label for="reply_to">Your Email</label>
+            <input type="text" name="reply_to" id="reply_to">
+          </div>
+          <input type="submit" id="button_form" value="Send Email">
+    </form>
+    
+    <script type="text/javascript"
+  src="https://cdn.jsdelivr.net/npm/emailjs-com@2/dist/email.min.js"></script>
+
+<script type="text/javascript">
+  emailjs.init('user_mKoIyTIxMRgZ66OUdJMVO')
+</script>
+    
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>    
+    
+    
+<style>
+    .field {
+  margin-bottom: 10px;
+  border-radius: 15px;        
+}
+
+.field label {
+  border-radius: 15px;     
+  display: block;
+  font-size: 14px;
+  color: #4460AA;
+}
+
+.field input {
+  border-radius: 15px;
+  display: block;
+  min-width: 250px;
+  line-height: 1.5;
+  font-size: 14px;
+}
+
+input[type="submit"] {
+  border-radius: 15px;    
+  display: block;
+  padding: 6px 30px;
+  margin-bottom: 20px;    
+  font-size: 14px;
+  background-color: #4460AA;
+  color: #fff;
+  border: none
+}
+
+    #rockshelves{
+        border-radius: 15px;
+    }    
+
+#form, #safetime{
+        display:none
+    }    
+    
+</style>
+</head>
+    
+<body>
+<script>
+        calendar.min = new Date().toISOString().split("T")[0];
+    
+        var rockHeight={
+            "11840": [7.6, "Cape Woolamai"],
+            "12454": [3.5, "Kilcunda"],
+            "12614": [6, 'Lorne'],
+            "13034": [6.1, 'Portland'],
+            "13014": [4.8, 'Point Lonsdale'],
+            "13813": [14.3, 'Cape Schanck'],
+            "13832": [4.4, 'Flinders'],
+            "35555": [8.3, 'Tongue Point'],
+            "27126": [2.2, 'Point Roadknight'],
+            "18321": [8.1, 'Point Hicks'],
+            "11838": [11, 'Cape Otway'],
+            "11514": [4.8, 'Eagle Rock']
+        }
+        var availableTime = {};
+        
+        function assignOptions(textArray, selector) {
+                          for (var i = 0; i < textArray.length;  i++) {
+                              var currentOption = document.createElement('option');
+                              currentOption.text = textArray[i];
+                              selector.appendChild(currentOption);
+                          }
+                        }
+    
+        function formatAMPM(date) {
+                      var hours = date.getHours();
+                      var minutes = date.getMinutes();
+                      var ampm = hours >= 12 ? 'pm' : 'am';
+                      hours = hours % 12;
+                      hours = hours ? hours : 12; // the hour '0' should be '12'
+                      minutes = minutes < 10 ? '0'+minutes : minutes;
+                      var strTime = hours + ':' + minutes + ' ' + ampm;
+                      return strTime;
+                    }
+    
+        function convertDateForIos(date) {
+            var arr = date.split(/[- :]/);
+            date = new Date(arr[0], arr[1]-1, arr[2], arr[3], arr[4], arr[5]);
+            return date;
+        }
+        //calculation part
+        const btn_date = document.getElementById("button_rockshelves")
+
+        document.getElementById('date-rockshelves')
+         .addEventListener('submit', function(event) {
+           event.preventDefault();
+           var date = new String(document.getElementById("calendar").value);
+           var rockshelf = new String(document.getElementById("rockshelves").value);
+//           document.getElementById("print").innerHTML = date;
+            
+           $(document).ready(function(){
+                //tide
+                $.get("https://stayingsafeonrockshelves.tk/wp-content/get-api-form.php?locations="+rockshelf+"&forecasts=tides&days=1&startDate="+date, function(dataTide) {
+                    var datTide = JSON.parse(dataTide);
+                    var eachTide = datTide.forecasts.tides.days[0].entries;
+                    
+                    //swell
+                    $.get("https://stayingsafeonrockshelves.tk/wp-content/get-api-form.php?locations="+rockshelf+"&forecasts=swell&days=1&startDate="+date, function(dataSwell) {
+                        var datSwell = JSON.parse(dataSwell);
+                        console.log(datSwell)
+                        if (datSwell.forecasts.swell.days[0]){
+                            var eachSwell = datSwell.forecasts.swell.days[0].entries;
+                        }else{
+                            document.getElementById("print").innerHTML = "There is no safe travelling time available on the selected date.";
+                            return;
+                        }
+                    
+                        
+                        for (var i = 0 ; i < eachTide.length ; i++){
+                            var tideHeight = eachTide[i].height;
+                            var swellHeight = eachSwell[i].height;
+                            if ((tideHeight+swellHeight)<=0.6*(rockHeight[rockshelf][0]*0.7) && i != (eachTide.length -1)){
+                                var dateTide = new Date(convertDateForIos(eachTide[i].dateTime))
+                                var nextTide = new Date(convertDateForIos(eachTide[i + 1].dateTime))
+                                 var timeTide = formatAMPM(dateTide)
+                                 var nextTideTime = formatAMPM(nextTide)
+                                 if (nextTideTime){
+                                    availableTime[timeTide] = nextTideTime
+                                 }
+                            }
+                        }
+                    
+                        if(Object.keys(availableTime).length === 0){
+                            document.getElementById("print").innerHTML = "There is no safe travelling time available on the selected date.";
+                            document.getElementById("safetime").style.display="none";
+                            document.getElementById("form").style.display="none";
+                        }else{
+                            document.getElementById("print").style.display="none"
+                            document.getElementById("safetime").style.display="block";
+                            document.getElementById("form").style.display="block";
+                            
+                            var timeoftheday = document.querySelector('.timeoftheday');
+
+                            assignOptions(Object.keys(availableTime), timeoftheday);
+                            
+                            timeoftheday.addEventListener('change', 
+                              function(event){
+                                event.preventDefault();
+                                var time = timeoftheday.value;
+                                var messageSend = "On: " + date + "  Trip to: "+ rockHeight[rockshelf][1] +"  Arrival Time: " + time +"  Leaving Time: "+availableTime[time];
+                                console.log(messageSend);
+                                
+                                document.getElementById('message').value = messageSend;
+                            
+                                //sending email part
+                                const btn = document.getElementById('button_form');
+
+                                document.getElementById('form')
+                                 .addEventListener('submit', function(event) {
+                                   event.preventDefault();
+
+                                   btn.value = 'Sending...';
+
+                                   const serviceID = 'default_service';
+                                   const templateID = 'template_lfz8pu2';
+
+                                   emailjs.sendForm(serviceID, templateID, this)
+                                    .then(() => {
+                                      btn.value = 'Send Email';
+                                      document.getElementById('form').reset()
+                                      alert('Sent!');
+                                    }, (err) => {
+                                      btn.value = 'Send Email';
+                                      alert(JSON.stringify(err));
+                                    });
+                                 });
+                                }, false);
+                            
+
+                        }
+                        
+                    
+                    });
+                   
+                    })
+                });
+            });
+            
+</script>
+</body>
+</html>

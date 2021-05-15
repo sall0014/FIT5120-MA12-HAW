@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+<div class="field" id ="activity-container">
+        <label for="activity" style="color:white">Select Activity:</label>
+            <select class="activity" style="font-size: 14px; border-radius: 15px;">
+                <option selected disabled>
+                    Activity
+                </option>
+            </select>
+</div>
+<div id="print" style ="position: relative; margin-top: 20px; color:white;"></div>
+
+</head>
+<script>
+    
+function assignOptions(textArray, selector) {
+                          for (var i = 0; i < textArray.length;  i++) {
+                              var currentOption = document.createElement('option');
+                              currentOption.text = textArray[i];
+                              selector.appendChild(currentOption);
+                          }
+                        }
+
+var selectedActivity = document.querySelector('.activity');
+    
+var activities = {"Rockfishing" : ["Portland","Lorne","Point RoadKnight","Point Lonsdale","Cape Schanck","Flinders","Cape Woolamai","Kilcunda","Tongue Point"],
+                    "Photography" : ["Portland","Cape Otway","Lorne","Point RoadKnight","Point Lonsdale","Flinders","Cape Schanck","Cape Woolamai","Kilcunda","Tongue Point","Point Hicks"],
+                    "Walking" : ["Cape Otway","Point Lonsdale","Point Hicks"],
+                    "Hiking" : ["Portland","Cape Otway","Point RoadKnight","Cape Schanck","Flinders","Cape Woolamai","Tongue Point"],
+                    "Surfing" : ["Portland","Lorne","Cape Woolamai","Kilcunda"],
+                    "Nature" : ["Cape Otway","Lorne","Tongue Point"],
+                    "Cycling" : ["Point RoadKnight","Point Lonsdale","Flinders","Kilcunda","Point Hicks"]}
+
+assignOptions(Object.keys(activities), selectedActivity);
+    
+selectedActivity.addEventListener('change', 
+        function(event){
+            event.preventDefault();
+            document.getElementById('print').innerHTML = "";
+            rockshelves = activities[selectedActivity.value]
+            for (var i = 0 ; i < rockshelves.length ; i++){
+                var show = document.getElementById('print');
+                show.innerHTML += (i+1) +". "+ rockshelves[i] + "<br>";
+            }
+            console.log(show)
+})
+            
+                                    
+    
+</script>
+</html>    

@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
+        </head>
+    <body>
+        <div id="rockshelfchart" style="padding: 0; margin: 0;">
+        <div class="rockshelfchart" data-num="0">
+        <div class="plot" id='myDiv' align="center"><!-- Plotly chart will be drawn inside this DIV --></div>
+        <p id="time" style="font-size: 11px;" align="center"></p>  
+        <p style="font-size: 11px;">Select Time Below: </p>
+        <div class="control-row" style="font-size: 11px; display: inline-block;">
+            <select class="timeoftheday" style="font-size: 11px;" id = "selectTide">
+                    <option id ='now' selected="selected"></option>
+            </select>
+            </div>
+        <div id="risk" style="color: black; text-align:center; font-weight: bold; width: 120px;display: inline-block;position:absolute;"></div>
+        </div>
+        </div>  
+        
+     <style>
+         option:hover{
+              background-color: deepskyblue;
+            }
+         option:checked {
+                box-shadow: 0 0 10px 100px deepskyblue inset; 
+         }
+         select {
+            margin-right: 20px;
+            overflow-y: auto;
+            text-align: center;
+            width: 120px;
+        }
+    </style>
+        <script>
+            function convertDateForIos(date) {
+                var arr = date.split(/[- :]/);
+                date = new Date(arr[0], arr[1]-1, arr[2], arr[3], arr[4], arr[5]);
+                return date;
+            }
+            //willy weather API cape otway
+            $(document).ready(function(){
+                //tide
+                $.get("https://stayingsafeonrockshelves.tk/wp-content/get-api.php?locations=11838&forecasts=tides", function(dataTide) {
+                    var datTide = JSON.parse(dataTide);
+                    var eachTide = datTide.forecasts.tides.days[0].entries;
+                    var listoftime = [];
+                    var listoftide = [];
+                    for (var i = 0 ; i < eachTide.length ; i++){
+                                 var dateTide = new Date(convertDateForIos(eachTide[i].dateTime))
+                                 var timeTide = formatAMPM(dateTide)
+                                 listoftime.push(dateTide);
+                                 tideType = eachTide[i].type;
+                                 listoftide.push(timeTide + " " + tideType.toUpperCase() + " Tide");
+
+                                    
+                        }
+                    function formatAMPM(date) {
+                      var hours = date.getHours();
+                      var minutes = date.getMinutes();
+                      var ampm = hours >= 12 ? 'pm' : 'am';
+                      hours = hours % 12;
+                      hours = hours ? hours : 12; // the hour '0' should be '12'
+                      minutes = minutes < 10 ? '0'+minutes : minutes;
+                      var strTime = hours + ':' + minutes + ' ' + ampm;
+                      return strTime;
+                    }
+                    
+                    
+                    //swell
+                    $.get("https://stayingsafeonrockshelves.tk/wp-content/get-api.php?locations=11838&forecasts=swell", function(dataSwell) {
+                    
+
+                        var rock = Math.round((11*0.70) * 100) / 100;
+                        var x = [0, 0, 5, 5, 0, 0, 5, 5];
+                        var y = [0, 5, 5, 0, 0, 5, 5, 0];
+                        var i = [7, 0, 0, 0, 4, 4, 6, 6, 4, 0, 3, 2];
+                        var j = [3, 4, 1, 2, 5, 6, 5, 2, 0, 1, 6, 3];
+                        var k = [0, 7, 2, 3, 6, 7, 1, 1, 5, 5, 7, 6];
+                        
+        
+
+                        var tide;
+                        var swell;
+                        var risk;
+                        
+                        var datSwell = JSON.parse(dataSwell);
+                        if (datSwell.forecasts.swell.days[0]){
+                            var eachSwell = datSwell.forecasts.swell.days[0].entries;
+                        }else{
+                            swell = 0;
+                        }
+                        
+                        
+                        
+                        function getTideTime(chosenTime){
+                            for (var i = 0 ; i < eachTide.length ; i++){
+                                 var dateTide = new Date(convertDateForIos(eachTide[i].dateTime))
+                                 var timeTide = formatAMPM(dateTide)
+                                 if(timeTide.split(" ")[1] === chosenTime.split(" ")[1] && 
+                                   timeTide.split(" ")[0].split(":")[0] === chosenTime.split(" ")[0].split(":")[0]){
+                                   tide = eachTide[i].height;}
+                                }
+
+                            for (var i = 0 ; i < eachSwell.length ; i++){
+                                 var dateSwell = new Date(convertDateForIos(eachSwell[i].dateTime))
+                                 var swellTide = formatAMPM(dateSwell)
+                                if(swellTide.split(" ")[1] === chosenTime.split(" ")[1] && 
+                                   swellTide.split(" ")[0].split(":")[0] === chosenTime.split(" ")[0].split(":")[0]){
+                                   swell = eachSwell[i].height;}
+
+                            }
+
+                        };
+                        
+                        function nextDate( startDate, dates ) {
+                                    var nearestDate, nearestDiff = Infinity;
+                                    for( var i = 0, n = dates.length;  i < n;  ++i ) {
+                                        var diff = Math.abs(dates[i] - startDate);
+                                        if( diff < nearestDiff ) {
+                                            nearestDiff = diff;
+                                            nearestDate = dates[i];
+                                        }
+                                    }
+                                    return nearestDate;
+                                }
+
+    
+                        var timeNow = formatAMPM(nextDate(new Date(), listoftime));
+                        document.getElementById("time").innerHTML = "At: " + formatAMPM(new Date());
+                        setChart(timeNow, rock, x, y, i, j, k);
+
+                        if (risk == "RISKY"){
+                                document.getElementById("risk").innerHTML = "It's risky! Do not visit!";
+                                document.getElementById("risk").style.backgroundColor = "red"; 
+                            } else if (risk == "SAFE"){
+                                document.getElementById("risk").innerHTML = "It's safe to go!";
+                                document.getElementById("risk").style.backgroundColor = "mediumseagreen"; 
+                            }
+                        
+            
+                        function setChart(chosenTime, rock, x, y, i, j, k){
+                            getTideTime(chosenTime);
+                            if ((tide+swell) >= (rock*0.60)){
+                                risk = "RISKY";
+                            }else{
+                                risk = "SAFE"
+                            }
+                            
+
+                            var trace1 = {
+                                x: x,
+                                y: y,
+                                z: [0, 0, 0, 0, rock, rock, rock, rock],
+                                i: i,
+                                j: j,
+                                k: k,
+                              opacity: 1,
+                              color: '#8b4513',
+                                type: 'mesh3d',
+                              flatshading: true,
+                              lighting: {facenormalsepsilon: 0},
+                              hoverinfo: 'text',
+                              text: sprintf("Rock Shelf<br>Height: %s m.", rock)
+                            }
+
+                            var trace2 = {
+                                x: x.map(function(item) { 
+                                // Increment each item by 1
+                                return item + 5; 
+                            }),
+                                y: y,
+                                z: [0, 0, 0, 0, tide, tide, tide, tide],
+                                i: i,
+                                j: j,
+                                k: k,
+                              opacity: 0.6,
+                              color: '#000039',
+                                type: 'mesh3d',
+                              flatshading: true,
+                              lighting: {facenormalsepsilon: 0},
+                              hoverinfo: 'text',
+                              text: sprintf("Tide<br>Height: %s m.", tide)
+                            }
+
+                            var trace3 = {
+                                x: x.map(function(item) { 
+                                // Increment each item by 1
+                                return item + 5; 
+                            }),
+                                y: y,
+                                z: [tide, tide, tide, tide, swell, swell, swell, swell],
+                                i: i,
+                                j: j,
+                                k: k,
+                              opacity: 0.6,
+                              color: '#00ced1',
+                                type: 'mesh3d',
+                              flatshading: true,
+                              lighting: {facenormalsepsilon: 0},
+                              hoverinfo: 'text',
+                              text: sprintf("Swell<br>Height: %s m.", swell)
+                            }
+                            
+                            var trace4 = {
+                                  type: "cone",
+                                  x: [4.5],
+                                  y: [2.5],
+                                  z: [rock+1.5],
+                                  u: [0],
+                                  v: [0],
+                                  w: [2],
+                                  sizemode: "absolute",
+                                  sizeref: 1.5,
+                                  anchor: "tip",
+                                  showscale: false,
+                                  colorscale: [[0, 'black'], [1,'black']],
+                                  opacity: 0.8,
+                                  hoverinfo: 'text',
+                                  text: 'You'
+                            }
+                            
+                            var trace5 ={
+                                  x:[4.5], y:[2.5], z: [rock+1.5],
+                                    mode: 'markers',
+                                    marker: {
+                                        size: 5,
+                                    color:"black",
+                                        opacity: 1},
+                                    type: 'scatter3d',
+                                    hoverinfo: 'text',
+                                    text: 'You'
+                                };
+                            
+                            var trace6 = {
+                                  type: 'scatter3d',
+                                  mode: 'lines+markers',
+                                  x: [4.5, 6, 6],
+                                  y: [2.5, 2.5, 2.5],
+                                  z: [rock+1, rock-0.5, 0],
+                                  line: {
+                                    width: 2,
+                                    color: "black"},
+                                  marker: {
+                                    size: 1.5,
+                                    color: "black"
+                                  },
+                                  hoverinfo: 'text',
+                                  text: 'You'
+                                 };  
+
+
+                            var layout = {
+                                showlegend: false,
+                                titlefont: {
+                                        "size": 11
+                                      },
+                                title: "<br>Today's Swell and Tide Level",
+                                autosize: false,
+                                width: 200,
+                                height: 150,
+                                margin: {
+                                    l: 0,
+                                    r: 0,
+                                    b: 0,
+                                    t: 0
+                                  },
+                                scene: {
+                                    xaxis: {
+                                         visible: false,
+                                         showticklabels: false
+                                      },
+                                    yaxis: {
+                                         visible: false,
+                                         showticklabels: false
+                                      },
+                                    zaxis: {
+                                         visible: false,
+                                         showticklabels: false
+                                      },
+                                    camera: {
+                                          center: {
+                                                x: 0, y: 0, z: 0}, 
+                                          eye: { 
+                                                x:0.5, y:-2.5, z:0.3}, 
+                                          up: {
+                                                x: 0, y: 0, z: 1}
+                                        },
+                                    aspectratio:{
+                                        x: 2.3,
+                                        y: 1,
+                                        z: 1
+                                    }
+                                   }
+                            }
+
+                            var config = {responsive: true, 
+                                          displayModeBar: false};
+
+                            var data = [trace1, trace2, trace3, trace4, trace5, trace6];
+
+                            Plotly.newPlot('myDiv', data, layout, config)
+
+                        };
+                        var innerContainer = document.querySelector('[data-num="0"'),
+                        plotEl = innerContainer.querySelector('.plot'),
+                        timeSelectorHigh = innerContainer.querySelector('.timeoftheday');
+
+                        function assignOptions(textArray, selector) {
+                          for (var i = 0; i < textArray.length;  i++) {
+                              var currentOption = document.createElement('option');
+                              currentOption.text = textArray[i];
+                              selector.appendChild(currentOption);
+                          }
+                          document.getElementById("now").text = "Now";
+                          document.getElementById("now").value = timeNow;    
+                        }
+                        
+                        document.getElementById("selectTide").size = listoftide.length + 1;
+
+                        assignOptions(listoftide, timeSelectorHigh);
+                    
+                        
+                        function updateTideHigh(){
+                            setChart(timeSelectorHigh.value, rock, x, y, i, j, k);
+                            if(timeSelectorHigh.value === timeNow){
+                                document.getElementById("time").innerHTML = "At: " + formatAMPM(new Date());
+                            }else{
+                                document.getElementById("time").innerHTML = "At: " + timeSelectorHigh.value.split(" ")[0] + " "+ timeSelectorHigh.value.split(" ")[1];
+                            }
+                            if (risk == "RISKY"){
+                                document.getElementById("risk").innerHTML = "It's risky! Do not visit!";
+                                document.getElementById("risk").style.backgroundColor = "red"; 
+                            } else if (risk == "SAFE"){
+                                document.getElementById("risk").innerHTML = "It's safe to go!";
+                                document.getElementById("risk").style.backgroundColor = "mediumseagreen"; 
+                            }
+            
+                        }
+
+                        
+                        timeSelectorHigh.addEventListener('change', updateTideHigh, false);
+
+                    })
+                })
+            })
+        </script>
+    </body>
+</html>
